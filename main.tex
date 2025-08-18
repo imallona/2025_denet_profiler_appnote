@@ -1,0 +1,106 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper,bottom=0.8in, left=0.8in, right=0.8in]{geometry}
+\usepackage{graphicx}
+\usepackage{environ}
+\usepackage[usenames]{xcolor}
+\usepackage{url}
+\usepackage[colorlinks=true,linkcolor=cyan,citecolor=blue]{hyperref}
+%\usepackage{subfigure}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{microtype}
+\linespread{1.25} % to get 1.5 linespacing
+\usepackage{float}
+%\usepackage[caption = false]{subfig}
+
+\newsavebox{\figsavebox}
+
+\newif\ifhidefigures
+
+\NewEnviron{conditionalfigure}[1][ht]{%
+  \ifhidefigures
+    % hide this figure
+    \let\oldlabel\label
+    \renewcommand{\label}[1]{\gdef\labelname{##1}}% store label name
+    \renewcommand{\caption}[1]{##1}% make \caption just print its argument
+    \begin{lrbox}{\figsavebox}
+      \BODY % capture enture figure body
+    \end{lrbox}
+    % step counter with reference and mark with label
+    \refstepcounter{figure}\oldlabel{\labelname}
+  \else
+    % traditional figure environment
+    \begin{figure}[#1]
+      \BODY
+    \end{figure}
+  \fi
+}
+
+\newcommand{\beginsupplement}{%
+        \setcounter{table}{0}
+        \renewcommand{\thetable}{S\arabic{table}}%
+        \setcounter{figure}{0}
+        \renewcommand{\thefigure}{S\arabic{figure}}%
+        \setcounter{section}{0}
+        \renewcommand{\thesection}{S\arabic{section}}%
+      }
+
+%\usepackage[sort&compress,numbers,square]{natbib}
+%\bibliographystyle{mplainnat}
+
+\title{\texttt{denet},}
+
+\author{TBD$^1$}
+
+\date{
+	$^1$University of Zurich \\ \texttt{\{auth1, auth2, auth3\}@mls.uzh.ch}\\%
+}
+
+\begin{document}
+\maketitle
+	
+\section{Abstract} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\vspace{1cm}
+
+\noindent\textbf{Keywords:} resource profiling, worfklow, benchmarking, bioinformatics
+
+\clearpage
+
+
+\section{Introduction}  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:intro}
+
+Blabla.
+
+
+\section{Competing interests}
+The authors declare no competing interests.
+
+\section{Funding}
+
+{\color{red} Mark}
+
+\subsection{Authors' contributions}
+
+X and Y conceived the project. X and Y designed and implemented the method. X and Y analyzed data. X and Y drafted the manuscript. All authors read and approved the manuscript.
+
+\subsection{Acknowledgements}
+
+We thank {\color{red}X}.
+
+\bibliographystyle{unsrt}
+\bibliography{refs}
+
+\clearpage
+
+\beginsupplement
+\section{Supplementary material}  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Supplementary methods}  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\end{document}
