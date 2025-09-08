@@ -83,13 +83,13 @@ University of Zurich and SIB Swiss Institute of Bioinformatics, Zurich, Switzerl
 
 \paragraph{Summary:} \texttt{denet} is a lightweight process monitoring utility providing real-time resource profiling of running processes. Denet reports CPU, memory, disk I/O, network activity, and thread usage, including recursive child monitoring, with adaptive sampling rates. Denet offers both a command-line interface (CLI) with colorized outputs and a Python API for inclusion in other software. Its output formats are structured in either JSON, JSONL, or CSV, and include performance metrics as well as process metadata, including PID and the executed command. The ease to parse profiling results make denet suitable for benchmarking, debugging, monitoring, and optimizing data-intensive pipelines in bioinformatics and other fields. 
 
-\paragraph{Availability and implementation:} \texttt{denet} is open-source software released under the GPLv3 license and maintained at \url{https://github.com/btraven00/denet}. It is implemented in Rust, with Python bindings provided via maturin, and can be installed from Cargo (\texttt{cargo install denet}) or PyPI (\texttt{pip install denet}). Most functionality does not require administrative privileges, enabling use on cloud platforms, HPC clusters, and standard Linux workstations. Certain advanced features, such as planned eBPF support, may require elevated permissions. Documentation, including usage examples and API references, is provided.
+\paragraph{Availability and implementation:} \texttt{denet} is open-source software released under the GPLv3 license and maintained at \url{https://github.com/btraven00/denet}. It is implemented in Rust, with Python bindings provided via maturin, and can be installed from Cargo (\texttt{cargo install denet}) or PyPI (\texttt{pip install denet}). Most functionality does not require administrative privileges, enabling use on cloud platforms, HPC clusters, and standard Linux workstations. Certain advanced features, such as eBPF support, may require elevated permissions. Documentation, including usage examples and API references, is provided.
 
-\vspace{1cm}
+\vspace{0.5cm}
 
 \noindent\textbf{Keywords:} resource profiling, workflow, benchmarking, bioinformatics
 
-\clearpage
+%\clearpage
 
 
 \section*{Introduction}  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -113,7 +113,7 @@ This adaptive profiling algorithm enables the characterization of short-lived or
 
 The tool collects multiple performance metrics and events:
 
-\begin{enumerate}[itemsep=0pt, topsep=0pt]
+\begin{enumerate}[itemsep=1pt, topsep=1pt]
     \item CPU usage: Aggregated and per-core, so a 100\% indicates a full single core, and 400\% four full single cores, following top/htop conventions in posix systems.
     \item Memory: Including RSS and VMS separately, hence providing information about peak usage, swapping events, and memory leaks.
     \item Disk reads and writes (IO): Bytes read and written per interval.
@@ -171,8 +171,7 @@ Table~\ref{tab:tool_comparison} describes \texttt{denet}'s capabilities as compa
 \begin{figure}[H]
 
 \begin{lstlisting}[frame=single,language=bash]
-# Real-time monitoring of the process `sleep 5` so profiling results:
-#   are reported as (colored) standard output:
+# Real-time monitoring of the process `sleep 5` (to the terminal):
 denet run sleep 5
 
 # To generate a report in JSON format, including metadata on the first line:
@@ -190,8 +189,7 @@ denet attach 1234
 # To monitor PID 1234 just for 10 seconds:
 denet --duration 10 attach 1234
 
-# To avoid polluting the standard output (quiet mode) 
-#   while profiling `python script.py`:
+# To avoid cluttering terminal output when profiling `python script.py`:
 denet --quiet --json --out metrics.jsonl run python script.py
 
 # To disable child process monitoring (only track the parent process):
