@@ -89,19 +89,19 @@ Granular resource profiling data (CPU and memory usage, disk and network I/O)  d
 
 Standard command-line tools are poorly suited for this task in automated settings: i, \emph{system-level profilers} (top, htop) lack process-specificity, making it difficult to isolate the resource footprint of a single job; ii, \emph{process-summary utilities} (time) report only cumulative totals upon completion, missing the real-time dynamics that often indicate bottlenecks. Furthermore, the unstructured, text-based output of these tools is designed for interactive use, not automated parsing. This characteristic hinders their integration into workflow management systems and complicates systematic, reproducible performance profiling.
 
-Major workflow systems, such as make, snakemake or nextflow, provide either none or non-fine-grained nor customizable resource profiling. In this context, denet provides a monitoring toolkit that could be either used interactively by coupling its CLI to specific commands, or embedded into scripts and/or workflow managers.
+Major workflow systems, such as make, snakemake or nextflow, provide either none or non-fine-grained nor customizable resource profiling. In this context, we describe a new monitoring toolkit, \texttt{denet} (Turkish: `inspection' or `check'), that could be either used interactively by coupling its CLI to specific commands, or embedded into scripts and/or workflow managers.
 
 \section*{Implementation and capabilities}
 
 \subsection*{Adaptive profiling with user-provided resolution}
 
-Denet provides sampling at regular time units (e.g., milliseconds). As an alternative and a main innovation, Denet also offers an \emph{adaptive sampling strategy}, that is, modulating the frequency of metric collection based on the elapsed runtime of the monitored process. In detail, during the first second, Denet samples at the highest frequency (e.g., every 100 ms), ensuring fine-grained resolution during process startup and transient activity spikes. During the next nine seconds, Denet  increases the sampling rate gradually to reach the user-provided maximum interval; this rate is maintained for processes running over 10 s, hence providing full control on the profiling resolution.
+\texttt{denet} provides sampling at regular time units (e.g., milliseconds). As an alternative and a main innovation, the tool also offers an \emph{adaptive sampling strategy}, that is, modulating the frequency of metric collection based on the elapsed runtime of the monitored process. In detail, during the first second, \texttt{denet} samples at the highest frequency (e.g., every 100 ms), ensuring fine-grained resolution during process startup and transient activity spikes. During the next nine seconds, the sampling rate is increased gradually to reach the user-provided maximum interval; this rate is maintained for processes running over 10 s, hence providing full control on the profiling resolution.
 
 This adaptive profiling algorithm enables the characterization of short-lived or dynamic tasks (such as CPU bursts or parallel IO) at high resolution, while also minimizing systems overhead for long running tasks.
 
 \subsection*{Metrics}
 
-Denet collects multiple information:
+The tool collects multiple performance metrics and events:
 
 \begin{enumerate}
     \item CPU usage: Aggregated and per-core, so a 100\% indicates a full single core, and 400\% four full single cores, following top/htop conventions in posix systems.
@@ -109,7 +109,7 @@ Denet collects multiple information:
     \item Disk reads and writes (IO): Bytes read and written per interval
     \item Thread counts: Thread counts and child processes spawned from a parent process are tracked and monitored, hence reporting parallelization and forking (e.g., as in frequent alignment tools, such as STAR or BWA). Tracking down the child processes of a parent can be disabled with `--no-include-children`. 
     \item Exit statuses: Monitored parent process exit code termination, indicating uneventful successes as well as error codes as reported by the process.
-    \item Logging: As a summary and metadata, denet reports the full command of the monitored process, the path to its executable, PID, runtime duration, and the profiling strategy (e.g., the Denet call, including the adaptive sampling specification, if used.)
+    \item Logging: As a summary and metadata, \texttt{denet} reports the full command of the monitored process, the path to its executable, PID, runtime duration, and the profiling strategy (e.g., the \texttt{denet} call, including the adaptive sampling specification, if used.)
     \item Signals: {\color{red}Are they captured?}
 \end{enumerate}
 
@@ -117,21 +117,21 @@ Denet collects multiple information:
 
 \subsection*{eBPF support and off-CPU analysis}
 
-In GNU/Linux systems, denet offers experimental support for extended Berkeley Packet Filter (eBPF), a native Linux kernel technology to run sandboxed programs. eBPF allows safe, low-level event tracing with minimal performance overhead, as it avoids the need for expensive context switches or data transfers between kernel and user space and enables direct instrumentation of kernel functions, system calls, and network events, providing granular visibility into resource utilization. 
+In GNU/Linux systems, \texttt{denet} offers experimental support for extended Berkeley Packet Filter (eBPF), a native Linux kernel technology to run sandboxed programs. eBPF allows safe, low-level event tracing with minimal performance overhead, as it avoids the need for expensive context switches or data transfers between kernel and user space and enables direct instrumentation of kernel functions, system calls, and network events, providing granular visibility into resource utilization. 
 
 eBPF effectiveness and low overhead have led to its widespread adoption for performance monitoring in large-scale industrial systems {\color{red} CITE}. Crucially for bioinformatics, eBPF is namespace-aware, hence allowing precise and efficient profiling of containerized processes, i.e. running with Docker or apptainer. This enables collecting detailed performance metrics from complex and containerized workflows without altering the application or the host environment.
 
-By using eBPF, denet can quantify off-cpu time, e.g., where the profiled application is spending its time waiting. This provides insights to optimize I/O patterns, fix lock contention, and address other non-computational bottlenecks that would otherwise remain hidden.
+By using eBPF, \texttt{denet} can quantify off-cpu time, e.g., where the profiled application is spending its time waiting. This provides insights to optimize I/O patterns, fix lock contention, and address other non-computational bottlenecks that would otherwise remain hidden.
 
 \subsection*{Architecture}
 
-Denet's Rust architecture is modular. The Rust library includes: core, for low-level system interaction and sampling reading from /proc on Linux; config, which manages user inputs (e.g., sampling intervals, monitoring and output options); error, to handle exceptions; cpu-sampler, to measure CPU time akin to top and htop; and python, containing the PyO3 bindings that expose the Rust API to python.
+\texttt{denet}'s Rust architecture is modular. The Rust library includes: core, for low-level system interaction and sampling reading from /proc on Linux; config, which manages user inputs (e.g., sampling intervals, monitoring and output options); error, to handle exceptions; cpu-sampler, to measure CPU time akin to top and htop; and python, containing the PyO3 bindings that expose the Rust API to python.
 
 \section*{Usage}
 
-\subsection*{Command-line interface}
+\subsection*{Command-line interface (CLI)}
 
-Denet's CLI is Unix-friendly \cite{raymond1999cathedral} and composable to facilitate inclusion into scripts and workflows. Figure~\ref{fig:cli} summarizes its CLI.\\
+\texttt{denet}'s CLI is Unix-friendly \cite{raymond1999cathedral} and composable to facilitate inclusion into scripts and workflows. Figure~\ref{fig:cli} summarizes its usage.\\
 
 \begin{figure}[H]
 
@@ -167,9 +167,9 @@ denet --no-include-children run python multi_process_script.py
     \label{fig:cli}
 \end{figure}
 
-\subsection*{Application Programming Interface}
+\subsection*{Application Programming Interface (API)}
 
-Denet’s fully documented API provides the CLI capabilities using a simple syntax, facilitating metrics postprocessing (e.g., generating aggregated statistics, such as min/max/avg) and import from any python codebase, including Jupyter notebooks. Figure~\ref{fig:api} depicts how to monitor a process and collect the JSON summary using the API.
+\texttt{denet}’s fully documented API provides the CLI capabilities using a simple syntax, facilitating metrics postprocessing (e.g., generating aggregated statistics, such as min/max/avg) and import from any python codebase, including Jupyter notebooks. Figure~\ref{fig:api} depicts how to monitor a process and collect the JSON summary using the API.
 
 
 \begin{figure}[H]
@@ -200,7 +200,7 @@ print(f"Collected {len(samples)} samples")
 summary_json = monitor.get_summary()
 \end{lstlisting}
 
-\caption{Denet's API usage example \label{fig:api}}
+\caption{Denet's API usage example. \label{fig:api}}
 \end{figure}
 
 
@@ -213,15 +213,13 @@ summary_json = monitor.get_summary()
 
 %{\color{red} cite or add \url{https://github.com/WanluLiuLab/labw_proc_profiler} to the table?}
 
-Table~\ref{tab:tool_comparison} describes denet's capabilities as compared to other profilers and Unix tools.
-
+Table~\ref{tab:tool_comparison} describes \texttt{denet}'s capabilities as compared to other profilers and Unix tools.
 
 \begin{table}[ht]
   \centering
   \footnotesize
   \caption{Comparison of process monitoring tools and libraries. Adapt. sampling: adaptive sampling. Struct. output: structured output.}
   \label{tab:tool_comparison}
-%  \begin{tabularx}{\linewidth}{@{} L L *{6}{C} @{}}
   \begin{tabularx}{\linewidth}{@{} L L *{5}{C} @{}}
    \toprule
     Tool                    & Output              & \thead{Process tree}  & API/CLI & \thead{Adapt. sampling} & \thead{Struct. output} & Extensibility     \\
@@ -240,11 +238,12 @@ Table~\ref{tab:tool_comparison} describes denet's capabilities as compared to ot
 
 \section*{Conclusion}
 
-Denet is a lightweight and customizable process monitoring tool purposefully built for the needs of modern bioinformatics workflows and benchmarks. As compared to other tools, Denet provides adaptive sampling, recursive process tree monitoring, and eBPF support.  Its dual interface, including a CLI for interactive usage or POSIX workflows, and a Python API for flexible programming, provides extra flexibility. Denet is free software.
+\texttt{denet} is a lightweight and customizable process monitoring tool purposefully built for the needs of modern bioinformatics workflows and benchmarks. As compared to other tools, Denet provides adaptive sampling, recursive process tree monitoring, and eBPF support.  Its dual interface, including a CLI for interactive usage or POSIX workflows, and a Python API for flexible programming, provides extra flexibility. \texttt{denet} is free software.
 
-In terms of limitations, Denet is built with Linux in mind, even if macOS might be supported via host APIs; and does not profile GPU usage.
+In terms of limitations, \texttt{denet} is built with Linux in mind, even if macOS might be supported via host APIs; and does not profile GPU usage.
 
 \section*{Competing interests}
+
 The authors declare no competing interests.
 
 \section*{Funding}
