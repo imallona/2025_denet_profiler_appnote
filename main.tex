@@ -180,7 +180,7 @@ import denet
 
 # Create a monitor for a process
 monitor = denet.ProcessMonitor(
-    cmd=["python", "-c", "import time; time.sleep(10)"],
+    cmd=["python", "-c", "import time; time.sleep(10)"], # command
     base_interval_ms=100,    # Start sampling every 100ms
     max_interval_ms=1000,    # Sample at most every 1000ms
     store_in_memory=True,    # Keep samples in memory
@@ -188,8 +188,8 @@ monitor = denet.ProcessMonitor(
     include_children=True    # Monitor child processes (default True)
 )
 
-# Let the monitor run automatically until the process completes
-# Samples are collected at the specified sampling rate in the background
+# Let the monitor run automatically until the process completes.
+#   Samples are collected at the specified sampling rate in the background
 monitor.run()
 
 # Access all collected samples after process completion
@@ -200,7 +200,7 @@ print(f"Collected {len(samples)} samples")
 summary_json = monitor.get_summary()
 \end{lstlisting}
 
-\caption{Denet's API usage example. \label{fig:api}}
+\caption{Denet's API usage example \label{fig:api}}
 \end{figure}
 
 
@@ -211,27 +211,28 @@ summary_json = monitor.get_summary()
 
 \section*{Comparison to other tools}
 
-{\color{red} cite or add \url{https://github.com/WanluLiuLab/labw_proc_profiler} to the table?}
+%{\color{red} cite or add \url{https://github.com/WanluLiuLab/labw_proc_profiler} to the table?}
 
+Table~\ref{tab:tool_comparison} describes denet's capabilities as compared to other profilers and Unix tools.
 
 
 \begin{table}[ht]
   \centering
   \footnotesize
-  \caption{Comparison of process monitoring tools and libraries}
+  \caption{Comparison of process monitoring tools and libraries. Adapt. sampling: adaptive sampling. Struct. output: structured output.}
   \label{tab:tool_comparison}
 %  \begin{tabularx}{\linewidth}{@{} L L *{6}{C} @{}}
   \begin{tabularx}{\linewidth}{@{} L L *{5}{C} @{}}
    \toprule
-    Tool                    & Output              & \thead{Process tree}  & API/CLI & \thead{Adaptive sampling} & \thead{Structured output} & Extensibility     \\
+    Tool                    & Output              & \thead{Process tree}  & API/CLI & \thead{Adapt. sampling} & \thead{Struct. output} & Extensibility     \\
     \midrule
     \texttt{denet}          & Terminal, JSON, CSV & Yes          & Both    & Yes                   & Yes               & Python, Rust      \\
     \texttt{top/htop}       & Terminal            & Partial      & CLI     & No                     & No                & No                \\
     \texttt{ps}             & Text/CSV            & No           & CLI     & No                     & No                & No                \\
     \texttt{time}           & Text                & No           & CLI     & No                     & No                & No                \\
     \texttt{pidstat}        & Text/CSV            & Partial      & CLI     & No           & Limited           & No                \\
-    \texttt{psutil (Python)}& \textcolor{red}{?}  & Partial      & API     & No          & Programmatic      & Python            \\
-    \texttt{psrecord}       & \textit{todo}       & \textit{todo}& \textit{todo}& \textit{todo} & \textit{todo}     & \textit{todo}     \\
+    \texttt{psutil\cite{rodola2020psutil}/psrecord\cite{psrecord}}& Text/PNG  & Partial      & Both     & No          & Limited      & Python            \\
+%    \texttt{psrecord}       & \textit{todo}       & \textit{todo}& \textit{todo}& \textit{todo} & \textit{todo}     & \textit{todo}     \\
     \bottomrule
   \end{tabularx}
 \end{table}
