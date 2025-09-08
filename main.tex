@@ -13,7 +13,15 @@
 \usepackage{microtype}
 \linespread{1.25} % to get 1.5 linespacing
 \usepackage{float}
+\usepackage{tabularx,booktabs}
 %\usepackage[caption = false]{subfig}
+
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily,
+  showstringspaces=false,
+  commentstyle=\color{blue},
+  keywordstyle=\color{blue}
+}
 
 \newsavebox{\figsavebox}
 
@@ -52,16 +60,16 @@
 
 \title{\texttt{denet}, a lightweight command-line tool for process monitoring in benchmarking and beyond}
 
-\author{TBD$^1$}
+\author{Ben Carrillo, Izaskun Mallona}
 
 \date{
-	$^1$University of Zurich \\ \texttt{\{auth1, auth2, auth3\}@mls.uzh.ch}\\%
+	$^1$University of Zurich and SIB Swiss Institute of Bioinformatics, Zurich, Switzerland \\ Correspondence: \texttt{benjamincarrillochica@uzh.ch, izaskun.mallona@gmail.com}\\%
 }
 
 \begin{document}
 \maketitle
 	
-\section{Abstract} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Abstract} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \paragraph{Summary:} \texttt{denet} is a lightweight process monitoring utility providing real-time resource profiling of running processes. Denet reports CPU, memory, disk I/O, network activity, and thread usage, including recursive child monitoring, with adaptive sampling rates. Denet offers both a command-line interface (CLI) with colorized outputs and a Python API for inclusion in other software. Its output formats are structured in either JSON, JSONL, or CSV, and include performance metrics as well as process metadata, including PID and the executed command. The ease to parse profiling results make denet suitable for benchmarking, debugging, monitoring, and optimizing data-intensive pipelines in bioinformatics and other fields. 
 
@@ -69,12 +77,12 @@
 
 \vspace{1cm}
 
-\noindent\textbf{Keywords:} resource profiling, worfklow, benchmarking, bioinformatics
+\noindent\textbf{Keywords:} resource profiling, workflow, benchmarking, bioinformatics
 
 \clearpage
 
 
-\section{Introduction}  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Introduction}  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:intro}
 
 Granular resource profiling data (CPU and memory usage, disk and network I/O)  drives bioinformatics performance optimization at multiple levels: guiding code improvements during tool development, informing the tuning of execution parameters, and shaping the design of the overall workflow.
@@ -83,15 +91,15 @@ Standard command-line tools are poorly suited for this task in automated setting
 
 Major workflow systems, such as make, snakemake or nextflow, provide either none or non-fine-grained nor customizable resource profiling. In this context, denet provides a monitoring toolkit that could be either used interactively by coupling its CLI to specific commands, or embedded into scripts and/or workflow managers.
 
-\section{Implementation and capabilities}
+\section*{Implementation and capabilities}
 
-\subsection{Adaptive profiling with user-provided resolution}
+\subsection*{Adaptive profiling with user-provided resolution}
 
 Denet provides sampling at regular time units (e.g., milliseconds). As an alternative and a main innovation, Denet also offers an \emph{adaptive sampling strategy}, that is, modulating the frequency of metric collection based on the elapsed runtime of the monitored process. In detail, during the first second, Denet samples at the highest frequency (e.g., every 100 ms), ensuring fine-grained resolution during process startup and transient activity spikes. During the next nine seconds, Denet  increases the sampling rate gradually to reach the user-provided maximum interval; this rate is maintained for processes running over 10 s, hence providing full control on the profiling resolution.
 
 This adaptive profiling algorithm enables the characterization of short-lived or dynamic tasks (such as CPU bursts or parallel IO) at high resolution, while also minimizing systems overhead for long running tasks.
 
-\subsection{Metrics}
+\subsection*{Metrics}
 
 Denet collects multiple information:
 
@@ -107,7 +115,7 @@ Denet collects multiple information:
 
 {\color{red}Discuss how are things averaged, per category - because mem and cpu aren’t the same way (per interval).}
 
-\subsection{eBPF support and off-cpu analysis}
+\subsection*{eBPF support and off-CPU analysis}
 
 In GNU/Linux systems, denet offers experimental support for extended Berkeley Packet Filter (eBPF), a native Linux kernel technology to run sandboxed programs. eBPF allows safe, low-level event tracing with minimal performance overhead, as it avoids the need for expensive context switches or data transfers between kernel and user space and enables direct instrumentation of kernel functions, system calls, and network events, providing granular visibility into resource utilization. 
 
@@ -115,70 +123,58 @@ eBPF effectiveness and low overhead have led to its widespread adoption for perf
 
 By using eBPF, denet can quantify off-cpu time, e.g., where the profiled application is spending its time waiting. This provides insights to optimize I/O patterns, fix lock contention, and address other non-computational bottlenecks that would otherwise remain hidden.
 
-\subsection{Architecture}
+\subsection*{Architecture}
 
 Denet's Rust architecture is modular. The Rust library includes: core, for low-level system interaction and sampling reading from /proc on Linux; config, which manages user inputs (e.g., sampling intervals, monitoring and output options); error, to handle exceptions; cpu-sampler, to measure CPU time akin to top and htop; and python, containing the PyO3 bindings that expose the Rust API to python.
 
-\section{Usage}
+\section*{Usage}
 
-\subsection{Command-line interface}
+\subsection*{Command-line interface}
 
-Denet's CLI is Unix-friendly \cite{raymond1999cathedral} and composable to facilitate inclusion into scripts and workflows. \\
+Denet's CLI is Unix-friendly \cite{raymond1999cathedral} and composable to facilitate inclusion into scripts and workflows. Figure~\ref{fig:cli} summarizes its CLI.\\
 
-\noindent Real-time monitoring of the process `sleep 5` so profiling results are reported as (colored) standard output:
+\begin{figure}[H]
 
-\begin{verbatim}
+\begin{lstlisting}[frame=single,language=bash]
+# Real-time monitoring of the process `sleep 5` so profiling results:
+#   are reported as (colored) standard output:
 denet run sleep 5
-\end{verbatim}
 
-\noindent To generate a report in JSON format, including metadata on the first line:
-
-\begin{verbatim}
+# To generate a report in JSON format, including metadata on the first line:
 denet --json run sleep 5 > metrics.json
-\end{verbatim}
 
-\noindent To modulate the sampling interval (in milliseconds):
-
-\begin{verbatim}
+# To modulate the sampling interval (in milliseconds):
 denet --interval 500 run sleep 5
-\end{verbatim}
 
-\noindent To specify the maximum sampling interval (adaptive sampling mode)
-
-\begin{verbatim}
+# To specify the maximum sampling interval (adaptive sampling mode):
 denet --max-interval 2000 run sleep 5
-\end{verbatim}
 
-\noindent To monitor an existing running process with PID 1234:
-
-\begin{verbatim}
+# To monitor an existing running process with PID 1234:
 denet attach 1234
-\end{verbatim}
 
-\noindent To monitor PID 1234 just for 10 seconds:
-
-\begin{verbatim}
+#To monitor PID 1234 just for 10 seconds:
 denet --duration 10 attach 1234
-\end{verbatim}
 
-\noindent To avoid polluting the standard output (quiet mode) while executing `python script.py`
-
-\begin{verbatim}
+# To avoid polluting the standard output (quiet mode) 
+#   while profiling `python script.py`:
 denet --quiet --json --out metrics.jsonl run python script.py
-\end{verbatim}
 
-\noindent To disable child process monitoring (only track the parent process)
-
-\begin{verbatim}
+# To disable child process monitoring (only track the parent process):
 denet --no-include-children run python multi_process_script.py
-\end{verbatim}
+\end{lstlisting}
+
+    \caption{Denet's CLI usage examples.}
+    \label{fig:cli}
+\end{figure}
+
+\subsection*{Application Programming Interface}
+
+Denet’s fully documented API provides the CLI capabilities using a simple syntax, facilitating metrics postprocessing (e.g., generating aggregated statistics, such as min/max/avg) and import from any python codebase, including Jupyter notebooks. Figure~\ref{fig:api} depicts how to monitor a process and collect the JSON summary using the API.
 
 
-\subsection{Application Programming Interface}
-
-Denet’s fully documented API provides the CLI capabilities using a simple syntax, facilitating metrics postprocessing (e.g., generating aggregated statistics, such as min/max/avg) and import from any python codebase, including Jupyter notebooks. To monitor a process and collect the JSON summary:
-
-\begin{verbatim}
+\begin{figure}[H]
+\begin{lstlisting}[frame=single,language=python]
+#!/usr/bin/python
 import json
 import denet
 
@@ -202,66 +198,75 @@ print(f"Collected {len(samples)} samples")
 
 # Get summary statistics
 summary_json = monitor.get_summary()
+\end{lstlisting}
 
-\end{verbatim}
+\caption{Denet's API usage example. \label{fig:api}}
+\end{figure}
 
-\subsection{Using denet to profile bwa-mem alignment performance}
 
-{\color{red} do some bwa-mem here}
 
-\section{Comparison to other tools}
+%\subsection{Using denet to profile bwa-mem alignment performance}
+
+%{\color{red} do some bwa-mem here}
+
+\section*{Comparison to other tools}
 
 {\color{red} cite or add \url{https://github.com/WanluLiuLab/labw_proc_profiler} to the table?}
 
+
+
 \begin{table}[ht]
-\centering
-\begin{tabular}{|l|l|c|c|c|c|c|c|}
-\hline
-\textbf{Tool} & \textbf{Output} & \textbf{Process Tree} & \textbf{API/CLI} & \textbf{Adaptive Sampling} & \textbf{Child Process Tracking} & \textbf{Structured Output} & \textbf{Extensibility} \\
-\hline
-\texttt{denet} & Terminal, JSON, CSV & Yes & Both & Yes & Yes & Yes & Python, Rust \\
-\texttt{top/htop} & Terminal & Partial & CLI & No & No & No & No \\
-\texttt{ps} & Text/CSV & No & CLI & No & No & No & No \\
-\texttt{time} & Text & No & CLI & No & No & No & No \\
-\texttt{pidstat} & CSV/Text & Partial & CLI & No & With options & Limited & No \\
-\texttt{psutil (Python)} & {\color{red}?} & Partial & API & No & Via scripting & Programmatic & Python \\
-\texttt{psrecord} & \textit{todo} & \textit{todo} & \textit{todo} & \textit{todo} & \textit{todo} & \textit{todo} & \textit{todo} \\
-\hline
-\end{tabular}
-\caption{Comparison of process monitoring tools and libraries.}
-\label{tab:tool_comparison}
+  \centering
+  \footnotesize
+  \caption{Comparison of process monitoring tools and libraries}
+  \label{tab:tool_comparison}
+%  \begin{tabularx}{\linewidth}{@{} L L *{6}{C} @{}}
+  \begin{tabularx}{\linewidth}{@{} L L *{5}{C} @{}}
+   \toprule
+    Tool                    & Output              & \thead{Process tree}  & API/CLI & \thead{Adaptive sampling} & \thead{Structured output} & Extensibility     \\
+    \midrule
+    \texttt{denet}          & Terminal, JSON, CSV & Yes          & Both    & Yes                   & Yes               & Python, Rust      \\
+    \texttt{top/htop}       & Terminal            & Partial      & CLI     & No                     & No                & No                \\
+    \texttt{ps}             & Text/CSV            & No           & CLI     & No                     & No                & No                \\
+    \texttt{time}           & Text                & No           & CLI     & No                     & No                & No                \\
+    \texttt{pidstat}        & Text/CSV            & Partial      & CLI     & No           & Limited           & No                \\
+    \texttt{psutil (Python)}& \textcolor{red}{?}  & Partial      & API     & No          & Programmatic      & Python            \\
+    \texttt{psrecord}       & \textit{todo}       & \textit{todo}& \textit{todo}& \textit{todo} & \textit{todo}     & \textit{todo}     \\
+    \bottomrule
+  \end{tabularx}
 \end{table}
 
-\section{Conclusion}
+
+\section*{Conclusion}
 
 Denet is a lightweight and customizable process monitoring tool purposefully built for the needs of modern bioinformatics workflows and benchmarks. As compared to other tools, Denet provides adaptive sampling, recursive process tree monitoring, and eBPF support.  Its dual interface, including a CLI for interactive usage or POSIX workflows, and a Python API for flexible programming, provides extra flexibility. Denet is free software.
 
 In terms of limitations, Denet is built with Linux in mind, even if macOS might be supported via host APIs; and does not profile GPU usage.
 
-\section{Competing interests}
+\section*{Competing interests}
 The authors declare no competing interests.
 
-\section{Funding}
+\section*{Funding}
 
-{\color{red} Mark}
+This project received no specific funding. IM acknowledges the University of Zurich GRC Career Grant 2025\_Q1\_CG\_001.
 
-\subsection{Authors' contributions}
+\section*{Acknowledgements}
 
-X and Y conceived the project. X and Y designed and implemented the method. X and Y analyzed data. X and Y drafted the manuscript. All authors read and approved the manuscript.
+We thank Mark D. Robinson for constructive feedback.
 
-\subsection{Acknowledgements}
+\subsection*{Authors' contributions}
 
-We thank {\color{red}X}.
+BC and IM conceived the project. BC coded the tool. IM drafted the first version of the manuscript.
 
 \bibliographystyle{unsrt}
 \bibliography{refs}
 
 \clearpage
 
-\beginsupplement
-\section{Supplementary material}  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\beginsupplement
+%\section{Supplementary material}  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Supplementary figures}  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\subsection{Supplementary figures}  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 \end{document}
