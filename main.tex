@@ -1,5 +1,5 @@
 \documentclass[10pt]{article}
-\usepackage[a4paper,bottom=0.8in, left=0.8in, right=0.8in]{geometry}
+\usepackage[a4paper,bottom=0.8in, left=0.8in, right=0.8in, top=0.8in]{geometry}
 \usepackage{graphicx}
 \usepackage{environ}
 \usepackage[usenames]{xcolor}
@@ -10,19 +10,26 @@
 \usepackage{amsthm}
 \usepackage[utf8]{inputenc}
 \usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan
+    }
 \usepackage{microtype}
 \linespread{1.25} % to get 1.5 linespacing
 \usepackage{float}
 \usepackage{tabularx,booktabs}
 \usepackage{orcidlink}
+\usepackage[misc]{ifsym}
+\usepackage{enumitem}
 %\usepackage[caption = false]{subfig}
 
 \usepackage{listings}
-\lstset{basicstyle=\ttfamily,
+\lstset{basicstyle=\small\ttfamily,
   showstringspaces=false,
-  commentstyle=\color{blue},
-  keywordstyle=\color{blue}
-}
+  commentstyle=\color{teal},
+  keywordstyle=\color{teal}}
 
 \newsavebox{\figsavebox}
 
@@ -61,11 +68,13 @@
 
 \title{\texttt{denet}, a lightweight command-line tool for process monitoring in benchmarking and beyond}
 
-\author{Ben Carrillo \orcidlink{0009-0003-5704-4151}, Izaskun Mallona \orcidlink{0000-0002-2853-7526}}
-
-\date{
-	University of Zurich and SIB Swiss Institute of Bioinformatics, Zurich, Switzerland \\ Correspondence: \texttt{benjamincarrillochica@uzh.ch, izaskun.mallona@gmail.com}\\%
+\author{Ben Carrillo \orcidlink{0009-0003-5704-4151}, Izaskun Mallona \orcidlink{0000-0002-2853-7526}\\
+\\
+University of Zurich and SIB Swiss Institute of Bioinformatics, Zurich, Switzerland \\ 
+{\small \Letter: \{\texttt{benjamincarrillochica,izaskun.mallona\}@mls.uzh.ch}}
 }
+
+\date{}
 
 \begin{document}
 \maketitle
@@ -104,23 +113,20 @@ This adaptive profiling algorithm enables the characterization of short-lived or
 
 The tool collects multiple performance metrics and events:
 
-\begin{enumerate}
+\begin{enumerate}[itemsep=0pt, topsep=0pt]
     \item CPU usage: Aggregated and per-core, so a 100\% indicates a full single core, and 400\% four full single cores, following top/htop conventions in posix systems.
     \item Memory: Including RSS and VMS separately, hence providing information about peak usage, swapping events, and memory leaks.
-    \item Disk reads and writes (IO): Bytes read and written per interval
-    \item Thread counts: Thread counts and child processes spawned from a parent process are tracked and monitored, hence reporting parallelization and forking (e.g., as in frequent alignment tools, such as STAR or BWA). Tracking down the child processes of a parent can be disabled with `--no-include-children`. 
+    \item Disk reads and writes (IO): Bytes read and written per interval.
+    \item Thread counts: Thread counts and child processes spawned from a parent process are tracked and monitored, hence reporting parallelization and forking (e.g., as in frequent alignment tools, such as STAR or BWA). Tracking down the child processes of a parent can be disabled with \texttt{--no-include-children}. 
     \item Exit statuses: Monitored parent process exit code termination, indicating uneventful successes as well as error codes as reported by the process.
     \item Logging: As a summary and metadata, \texttt{denet} reports the full command of the monitored process, the path to its executable, PID, runtime duration, and the profiling strategy (e.g., the \texttt{denet} call, including the adaptive sampling specification, if used.)
-    \item Signals: {\color{red}Are they captured?}
 \end{enumerate}
-
-{\color{red}Discuss how are things averaged, per category - because mem and cpu aren’t the same way (per interval).}
 
 \subsection*{eBPF support and off-CPU analysis}
 
-In GNU/Linux systems, \texttt{denet} offers experimental support for extended Berkeley Packet Filter (eBPF), a native Linux kernel technology to run sandboxed programs. eBPF allows safe, low-level event tracing with minimal performance overhead, as it avoids the need for expensive context switches or data transfers between kernel and user space and enables direct instrumentation of kernel functions, system calls, and network events, providing granular visibility into resource utilization. 
+In GNU/Linux systems, \texttt{denet} offers experimental support for extended Berkeley Packet Filter (eBPF), a native Linux kernel technology to run sandboxed programs. eBPF allows safe, low-level event tracing with minimal performance overhead, as it avoids the need for expensive context switches or data transfers between kernel and user space and enables direct instrumentation of kernel functions, system calls, and network events, providing granular visibility into resource utilization \cite{gbadamosi2024ebpf}. 
 
-eBPF effectiveness and low overhead have led to its widespread adoption for performance monitoring in large-scale industrial systems {\color{red} CITE}. Crucially for bioinformatics, eBPF is namespace-aware, hence allowing precise and efficient profiling of containerized processes, i.e. running with Docker or apptainer. This enables collecting detailed performance metrics from complex and containerized workflows without altering the application or the host environment.
+eBPF effectiveness and low overhead have led to its widespread adoption for performance monitoring in large-scale industrial systems \cite{benson2024netedit}. Crucially for bioinformatics, eBPF is namespace-aware, hence allowing precise and efficient profiling of containerized processes, i.e. running with Docker or apptainer. This enables collecting detailed performance metrics from complex and containerized workflows without altering the application or the host environment.
 
 By using eBPF, \texttt{denet} can quantify off-cpu time, e.g., where the profiled application is spending its time waiting. This provides insights to optimize I/O patterns, fix lock contention, and address other non-computational bottlenecks that would otherwise remain hidden.
 
@@ -128,11 +134,39 @@ By using eBPF, \texttt{denet} can quantify off-cpu time, e.g., where the profile
 
 \texttt{denet}'s Rust architecture is modular. The Rust library includes: core, for low-level system interaction and sampling reading from /proc on Linux; config, which manages user inputs (e.g., sampling intervals, monitoring and output options); error, to handle exceptions; cpu-sampler, to measure CPU time akin to top and htop; and python, containing the PyO3 bindings that expose the Rust API to python.
 
+
+\subsection*{Comparison to other tools}
+
+%{\color{red} cite or add \url{https://github.com/WanluLiuLab/labw_proc_profiler} to the table?}
+
+Table~\ref{tab:tool_comparison} describes \texttt{denet}'s capabilities as compared to other profilers and Unix tools.
+
+\begin{table}[ht]
+  \centering
+  \footnotesize
+  \caption{Comparison of process monitoring tools and libraries.}
+  \label{tab:tool_comparison}
+  \begin{tabularx}{\linewidth}{c c c c c c} %{@{} L L *{5}{C} @{}}
+   \toprule
+    Tool                    & Output              & Process tree  & API/CLI & Adaptive sampling &  Extensibility     \\
+    \midrule
+    \texttt{denet}          & Terminal, JSON, CSV & Yes          & Both    & Yes                   & Python, Rust      \\
+    \texttt{top/htop}       & Terminal            & Partial      & CLI     & No                    & No                \\
+    \texttt{ps}             & Text/CSV            & No           & CLI     & No                    & No                \\
+    \texttt{time}           & Text                & No           & CLI     & No                    & No                \\
+    \texttt{pidstat}        & Text/CSV            & Partial      & CLI     & No           & No                \\
+    \texttt{psutil\cite{rodola2020psutil}/psrecord\cite{psrecord}}& Text/PNG  & Partial      & Both     & No          & Python            \\
+%    \texttt{psrecord}       & \textit{todo}       & \textit{todo}& \textit{todo}& \textit{todo} & \textit{todo}     & \textit{todo}     \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+
 \section*{Usage}
 
 \subsection*{Command-line interface (CLI)}
 
-\texttt{denet}'s CLI is Unix-friendly \cite{raymond1999cathedral} and composable to facilitate inclusion into scripts and workflows. Figure~\ref{fig:cli} summarizes its usage.\\
+\texttt{denet}'s CLI is Unix-friendly \cite{raymond1999cathedral} and composable to facilitate inclusion into scripts and workflows (Figure~\ref{fig:cli}).\\
 
 \begin{figure}[H]
 
@@ -153,7 +187,7 @@ denet --max-interval 2000 run sleep 5
 # To monitor an existing running process with PID 1234:
 denet attach 1234
 
-#To monitor PID 1234 just for 10 seconds:
+# To monitor PID 1234 just for 10 seconds:
 denet --duration 10 attach 1234
 
 # To avoid polluting the standard output (quiet mode) 
@@ -175,7 +209,7 @@ denet --no-include-children run python multi_process_script.py
 
 \begin{figure}[H]
 \begin{lstlisting}[frame=single,language=python]
-#!/usr/bin/python
+#!/usr/bin/python3
 import json
 import denet
 
@@ -209,32 +243,6 @@ summary_json = monitor.get_summary()
 %\subsection{Using denet to profile bwa-mem alignment performance}
 
 %{\color{red} do some bwa-mem here}
-
-\section*{Comparison to other tools}
-
-%{\color{red} cite or add \url{https://github.com/WanluLiuLab/labw_proc_profiler} to the table?}
-
-Table~\ref{tab:tool_comparison} describes \texttt{denet}'s capabilities as compared to other profilers and Unix tools.
-
-\begin{table}[ht]
-  \centering
-  \footnotesize
-  \caption{Comparison of process monitoring tools and libraries. Adapt. sampling: adaptive sampling. Struct. output: structured output.}
-  \label{tab:tool_comparison}
-  \begin{tabularx}{\linewidth}{@{} L L *{5}{C} @{}}
-   \toprule
-    Tool                    & Output              & \thead{Process tree}  & API/CLI & \thead{Adapt. sampling} & \thead{Struct. output} & Extensibility     \\
-    \midrule
-    \texttt{denet}          & Terminal, JSON, CSV & Yes          & Both    & Yes                   & Yes               & Python, Rust      \\
-    \texttt{top/htop}       & Terminal            & Partial      & CLI     & No                     & No                & No                \\
-    \texttt{ps}             & Text/CSV            & No           & CLI     & No                     & No                & No                \\
-    \texttt{time}           & Text                & No           & CLI     & No                     & No                & No                \\
-    \texttt{pidstat}        & Text/CSV            & Partial      & CLI     & No           & Limited           & No                \\
-    \texttt{psutil\cite{rodola2020psutil}/psrecord\cite{psrecord}}& Text/PNG  & Partial      & Both     & No          & Limited      & Python            \\
-%    \texttt{psrecord}       & \textit{todo}       & \textit{todo}& \textit{todo}& \textit{todo} & \textit{todo}     & \textit{todo}     \\
-    \bottomrule
-  \end{tabularx}
-\end{table}
 
 
 \section*{Conclusion}
