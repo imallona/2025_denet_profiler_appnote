@@ -71,7 +71,7 @@
 \author{Ben Carrillo \orcidlink{0009-0003-5704-4151}, Izaskun Mallona \orcidlink{0000-0002-2853-7526}\\
 \\
 University of Zurich and SIB Swiss Institute of Bioinformatics, Zurich, Switzerland \\ 
-{\small \Letter: \{\texttt{benjamincarrillochica,izaskun.mallona\}@mls.uzh.ch}}
+{ \Letter: \texttt{benjamincarrillochica@uzh.ch} and \texttt{izaskun.mallona@mls.uzh.ch}}
 }
 
 \date{}
@@ -81,7 +81,7 @@ University of Zurich and SIB Swiss Institute of Bioinformatics, Zurich, Switzerl
 	
 \section*{Abstract} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\paragraph{Summary:} \texttt{denet} is a lightweight process monitoring utility providing real-time resource profiling of running processes. Denet reports CPU, memory, disk I/O, network activity, and thread usage, including recursive child monitoring, with adaptive sampling rates. Denet offers both a command-line interface (CLI) with colorized outputs and a Python API for inclusion in other software. Its output formats are structured in either JSON, JSONL, or CSV, and include performance metrics as well as process metadata, including PID and the executed command. The ease to parse profiling results make denet suitable for benchmarking, debugging, monitoring, and optimizing data-intensive pipelines in bioinformatics and other fields. 
+\paragraph{Summary:} \texttt{denet} is a lightweight process monitoring utility providing real-time resource profiling of running processes. denet reports CPU, memory, disk I/O, network activity, and thread usage, including recursive child monitoring, with adaptive sampling rates. Denet offers both a command-line interface (CLI) with colorized outputs and a Python API for inclusion in other software. Its output formats are structured in either JSON, JSONL, or CSV, and include performance metrics as well as process metadata, including PID and the executed command. The ease to parse profiling results make denet suitable for benchmarking, debugging, monitoring, and optimizing data-intensive pipelines in bioinformatics and other fields. 
 
 \paragraph{Availability and implementation:} \texttt{denet} is open-source software released under the GPLv3 license and maintained at \url{https://github.com/btraven00/denet}. It is implemented in Rust, with Python bindings provided via maturin, and can be installed from Cargo (\texttt{cargo install denet}) or PyPI (\texttt{pip install denet}). Most functionality does not require administrative privileges, enabling use on cloud platforms, HPC clusters, and standard Linux workstations. Certain advanced features, such as eBPF support, may require elevated permissions. Documentation, including usage examples and API references, is provided.
 
@@ -124,11 +124,11 @@ The tool collects multiple performance metrics and events:
 
 \subsection*{eBPF support and off-CPU analysis}
 
-In GNU/Linux systems, \texttt{denet} offers experimental support for extended Berkeley Packet Filter (eBPF), a native Linux kernel technology to run sandboxed programs. eBPF allows safe, low-level event tracing with minimal performance overhead, as it avoids the need for expensive context switches or data transfers between kernel and user space and enables direct instrumentation of kernel functions, system calls, and network events, providing granular visibility into resource utilization \cite{gbadamosi2024ebpf}. 
+In GNU/Linux systems, \texttt{denet} offers experimental support for extended Berkeley Packet Filter (eBPF), a native Linux kernel technology to run sandboxed programs. eBPF allows safe, low-level event tracing with minimal performance overhead, as it avoids the need for expensive context switches or data transfers between kernel and user space and enables direct instrumentation of kernel functions, system calls, and network events, providing granular visibility into resource utilization \cite{gregg2019bpf,gbadamosi2024ebpf}. 
 
-eBPF effectiveness and low overhead have led to its widespread adoption for performance monitoring in large-scale industrial systems \cite{benson2024netedit}. Crucially for bioinformatics, eBPF is namespace-aware, hence allowing precise and efficient profiling of containerized processes, i.e. running with Docker or apptainer. This enables collecting detailed performance metrics from complex and containerized workflows without altering the application or the host environment.
+eBPF effectiveness and low overhead have led to its widespread adoption for performance monitoring in large-scale industrial systems \cite{benson2024netedit}. Crucially for bioinformatics, eBPF is namespace-aware, hence allowing precise and efficient profiling of containerized processes, i.e. running with Docker or apptainer. This enables collecting detailed performance metrics from complex and containerized workflows without altering the profiled application or the host environment.
 
-By using eBPF, \texttt{denet} can quantify off-cpu time, e.g., where the profiled application is spending its time waiting. This provides insights to optimize I/O patterns, fix lock contention, and address other non-computational bottlenecks that would otherwise remain hidden.
+By using eBPF via BCC \cite{bcc}, \texttt{denet} can quantify off-cpu time, e.g., where the profiled application is spending its time waiting. This provides insights to optimize I/O patterns, fix lock contention, and address other non-computational bottlenecks that would otherwise remain hidden.
 
 \subsection*{Architecture}
 
@@ -143,19 +143,20 @@ Table~\ref{tab:tool_comparison} describes \texttt{denet}'s capabilities as compa
 
 \begin{table}[ht]
   \centering
-  \footnotesize
+  \small
   \caption{Comparison of process monitoring tools and libraries.}
   \label{tab:tool_comparison}
   \begin{tabularx}{\linewidth}{c c c c c c} %{@{} L L *{5}{C} @{}}
    \toprule
-    Tool                    & Output              & Process tree  & API/CLI & Adaptive sampling &  Extensibility     \\
+    Tool                    & Output              & Process tree  & API/CLI & Adaptive sampling &  eBPF     \\
     \midrule
-    \texttt{denet}          & Terminal, JSON, CSV & Yes          & Both    & Yes                   & Python, Rust      \\
+    \texttt{denet}          & Terminal, JSON, CSV & Yes          & Both    & Yes                   & Yes      \\
+    \texttt{bpftrace}\cite{bpftrace}       & Terminal            & Yes         & Both      & No                    & Yes \\
     \texttt{top/htop}       & Terminal            & Partial      & CLI     & No                    & No                \\
     \texttt{ps}             & Text/CSV            & No           & CLI     & No                    & No                \\
     \texttt{time}           & Text                & No           & CLI     & No                    & No                \\
     \texttt{pidstat}        & Text/CSV            & Partial      & CLI     & No           & No                \\
-    \texttt{psutil\cite{rodola2020psutil}/psrecord\cite{psrecord}}& Text/PNG  & Partial      & Both     & No          & Python            \\
+    \texttt{psutil\cite{rodola2020psutil}/psrecord\cite{psrecord}}& Text/PNG  & Partial      & Both     & No          & No            \\
 %    \texttt{psrecord}       & \textit{todo}       & \textit{todo}& \textit{todo}& \textit{todo} & \textit{todo}     & \textit{todo}     \\
     \bottomrule
   \end{tabularx}
@@ -245,9 +246,9 @@ summary_json = monitor.get_summary()
 
 \section*{Conclusion}
 
-\texttt{denet} is a lightweight and customizable process monitoring tool purposefully built for the needs of modern bioinformatics workflows and benchmarks. As compared to other tools, Denet provides adaptive sampling, recursive process tree monitoring, and eBPF support.  Its dual interface, including a CLI for interactive usage or POSIX workflows, and a Python API for flexible programming, provides extra flexibility. \texttt{denet} is free software.
+\texttt{denet} is a lightweight and customizable process monitoring tool purposefully built for the needs of modern bioinformatics workflows and benchmarks. As compared to other tools, Denet provides adaptive sampling, recursive process tree monitoring, and eBPF support.  Its dual interface, including a CLI for interactive usage or POSIX workflows, and a Python API for flexible programming, provides extra flexibility. \texttt{denet} is free software. The eBPF support requires Linux 4.x or above kernels compiled with CONFIG\_BPF\_SYSCALL (i.e., Ubuntu systems).
 
-In terms of limitations, \texttt{denet} is built with Linux in mind, even if macOS might be supported via host APIs; and does not profile GPU usage.
+In terms of limitations, \texttt{denet} is built with Linux in mind, even if macOS might be supported via host APIs; and does not profile GPU usage. {\color{red}As compared to bpftrace, XX}
 
 \section*{Competing interests}
 
@@ -257,9 +258,9 @@ The authors declare no competing interests.
 
 This project received no specific funding. IM acknowledges the University of Zurich GRC Career Grant 2025\_Q1\_CG\_001.
 
-\section*{Acknowledgements}
+\section*{Acknowledgments}
 
-We thank Mark D. Robinson for constructive feedback.
+We thank Mark D. Robinson and Charlotte Soneson for constructive feedback.
 
 \section*{Authors' contributions}
 
