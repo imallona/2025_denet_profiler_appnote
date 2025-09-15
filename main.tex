@@ -1,12 +1,11 @@
 \documentclass[10pt]{article}
 \usepackage[a4paper,bottom=0.8in, left=0.8in, right=0.8in, top=0.8in]{geometry}
 \usepackage{graphicx}
-\usepackage{environ}
+%\usepackage{environ}
 \usepackage{xcolor}
-\usepackage{url}
-\usepackage[colorlinks=true,linkcolor=cyan,citecolor=blue]{hyperref}
-\usepackage{amsmath}
-\usepackage{amsthm}
+%\usepackage{url}
+%\usepackage{amsmath}
+%\usepackage{amsthm}
 \usepackage[utf8]{inputenc}
 \usepackage{hyperref}
 \hypersetup{
@@ -22,50 +21,18 @@
 \usepackage{orcidlink}
 \usepackage[misc]{ifsym}
 \usepackage{enumitem}
-
 \usepackage{listings}
 \lstset{basicstyle=\small\ttfamily,
   showstringspaces=false,
   commentstyle=\color{teal},
   keywordstyle=\color{teal}}
 
-\newsavebox{\figsavebox}
-
-\newif\ifhidefigures
-
-\NewEnviron{conditionalfigure}[1][ht]{%
-  \ifhidefigures
-    % hide this figure
-    \let\oldlabel\label
-    \renewcommand{\label}[1]{\gdef\labelname{##1}}% store label name
-    \renewcommand{\caption}[1]{##1}% make \caption just print its argument
-    \begin{lrbox}{\figsavebox}
-      \BODY % capture enture figure body
-    \end{lrbox}
-    % step counter with reference and mark with label
-    \refstepcounter{figure}\oldlabel{\labelname}
-  \else
-    % traditional figure environment
-    \begin{figure}[#1]
-      \BODY
-    \end{figure}
-  \fi
-}
-
-\newcommand{\beginsupplement}{%
-        \setcounter{table}{0}
-        \renewcommand{\thetable}{S\arabic{table}}%
-        \setcounter{figure}{0}
-        \renewcommand{\thefigure}{S\arabic{figure}}%
-        \setcounter{section}{0}
-        \renewcommand{\thesection}{S\arabic{section}}%
-      }
-
 \title{\texttt{denet}, a lightweight command-line tool for process monitoring in benchmarking and beyond}
 
 \author{Ben Carrillo \orcidlink{0009-0003-5704-4151}, Izaskun Mallona \orcidlink{0000-0002-2853-7526}\\
 \\
-University of Zurich and SIB Swiss Institute of Bioinformatics, Zurich, Switzerland \\ 
+Department of Molecular Life Sciences, University of Zurich,\\
+and SIB Swiss Institute of Bioinformatics, Zurich, Switzerland \\ 
 { \Letter: \texttt{benjamincarrillochica@uzh.ch} and \texttt{izaskun.mallona@mls.uzh.ch}}
 }
 
@@ -78,7 +45,7 @@ University of Zurich and SIB Swiss Institute of Bioinformatics, Zurich, Switzerl
 
 \paragraph{Summary:} \texttt{denet} is a lightweight process monitoring utility providing real-time resource profiling of running processes. \texttt{denet} reports CPU, memory, disk I/O, network activity, and thread usage, including recursive child monitoring, with adaptive sampling rates. It offers both a command-line interface (CLI) with colorized outputs and a Python API for inclusion in other software. Its output formats are structured as either JSON, JSONL, or CSV, and include performance metrics as well as process metadata, including PID and the executed command. The easy to parse profiling results make \texttt{denet} suitable for benchmarking, debugging, monitoring, and optimizing data-intensive pipelines in bioinformatics and other fields. 
 
-\paragraph{Availability and implementation:} \texttt{denet} is open-source software released under the GPLv3 license and maintained at \url{https://github.com/btraven00/denet}. It is implemented in Rust, with Python bindings provided via maturin, and can be installed from Cargo (\texttt{cargo install denet}) or PyPI (\texttt{pip install denet}). Most functionality does not require administrative privileges, enabling use on cloud platforms, HPC clusters, and standard Linux workstations. Certain advanced features, such as eBPF support, may require elevated permissions. Documentation, including usage examples and API references, is provided.
+\paragraph{Availability and implementation:} \texttt{denet} is open-source software released under the GPLv3 license and maintained at \url{https://github.com/btraven00/denet}. It is implemented in Rust, with Python bindings provided via \texttt{maturin}, and can be installed from Cargo (\texttt{cargo install denet}) or PyPI (\texttt{pip install denet}). Most functionality does not require administrative privileges, enabling use on cloud platforms, HPC clusters, and standard Linux workstations. Certain advanced features, such as eBPF support, may require elevated permissions. Documentation, including usage examples and API references, is provided.
 
 \vspace{0.5cm}
 
@@ -126,6 +93,8 @@ By using eBPF via BCC \cite{bcc}, \texttt{denet} can quantify off-CPU time, e.g.
 \texttt{denet}'s Rust architecture is modular. The Rust library includes: core, for low-level system interaction and sampling reading from /proc on Linux; config, which manages user inputs (e.g., sampling intervals, monitoring and output options); error, to handle exceptions; cpu-sampler, to measure CPU time akin to top and htop; and python, containing the PyO3 bindings that expose the Rust API to Python.
 
 \subsection*{Comparison to other tools}
+
+\vspace{-0.1cm}
 
 Table~\ref{tab:tool_comparison} describes \texttt{denet}'s capabilities as compared to other profilers and Unix tools.
 
@@ -302,12 +271,5 @@ Eric Raymond.
 \newblock {\em Knowledge, Technology \& Policy}, 12(3):23--49, 1999.
 
 \end{thebibliography}
-
-\clearpage
-
-%\beginsupplement
-%\section{Supplementary material}  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%\subsection{Supplementary figures}  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \end{document}
