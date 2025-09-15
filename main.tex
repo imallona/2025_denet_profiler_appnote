@@ -112,7 +112,7 @@ This adaptive profiling algorithm enables the characterization of short-lived or
 
 The tool collects multiple performance metrics and events:
 
-\begin{enumerate}[itemsep=1pt, topsep=1pt]
+\begin{enumerate}[itemsep=0.5pt, topsep=1pt]
     \item CPU usage: Aggregated and per-core, so 100\% indicates a full single core, and 400\% four full single cores, following top/htop conventions in posix systems.
     \item Memory: Including RSS and VMS separately, hence providing information about peak usage, swapping events, and memory leaks.
     \item Disk reads and writes (I/O): Bytes read and written per interval.
@@ -150,17 +150,17 @@ Table~\ref{tab:tool_comparison} describes \texttt{denet}'s capabilities as compa
     Tool                    & Output              & Process tree  & API/CLI & Adaptive sampling &  eBPF     \\
     \midrule
     \texttt{denet}          & Terminal, JSON, CSV & Yes          & Both    & Yes                   & Yes      \\
-    \texttt{bpftrace}\cite{bpftrace}       & Terminal            & Yes         & Both      & No                    & Yes \\
+    \texttt{bpftrace}\cite{bpftrace}       & Terminal            & Yes         & CLI      & No                    & Yes \\
     \texttt{top/htop}       & Terminal            & Partial      & CLI     & No                    & No                \\
     \texttt{ps}             & Text/CSV            & No           & CLI     & No                    & No                \\
     \texttt{time}           & Text                & No           & CLI     & No                    & No                \\
     \texttt{pidstat}        & Text/CSV            & Partial      & CLI     & No           & No                \\
     \texttt{psutil\cite{rodola2020psutil}/psrecord\cite{psrecord}}& Text/PNG  & Partial      & Both     & No          & No            \\
-%    \texttt{psrecord}       & \textit{todo}       & \textit{todo}& \textit{todo}& \textit{todo} & \textit{todo}     & \textit{todo}     \\
     \bottomrule
   \end{tabularx}
 \end{table}
 
+\vspace{-0.8cm}
 
 \section*{Usage}
 
@@ -196,7 +196,7 @@ denet --quiet --json --out metrics.jsonl run python script.py
 denet --no-include-children run python multi_process_script.py
 \end{lstlisting}
 
-    \caption{Denet's CLI usage examples.}
+    \caption{CLI usage examples.}
     \label{fig:cli}
 \end{figure}
 
@@ -211,7 +211,7 @@ denet --no-include-children run python multi_process_script.py
 import json
 import denet
 
-# Create a monitor for a process
+# Create a monitor for a process (command)
 monitor = denet.ProcessMonitor(
     cmd=["python", "-c", "import time; time.sleep(10)"], # command
     base_interval_ms=100,    # Start sampling every 100ms
@@ -233,7 +233,7 @@ print(f"Collected {len(samples)} samples")
 summary_json = monitor.get_summary()
 \end{lstlisting}
 
-\caption{Denet's API usage example. \label{fig:api}}
+\caption{API usage example. \label{fig:api}}
 \end{figure}
 
 
@@ -247,7 +247,7 @@ summary_json = monitor.get_summary()
 
 \texttt{denet} is a lightweight and customizable process monitoring tool purposefully built for the needs of modern bioinformatics workflows and benchmarks. Compared to other tools, \texttt{denet} provides adaptive sampling, recursive process tree monitoring, and eBPF support.  Its dual interface, including a CLI for interactive usage or POSIX workflows, and a Python API for flexible programming, provides extra flexibility. \texttt{denet} is free software. The eBPF support requires Linux 4.x or above kernels compiled with CONFIG\_BPF\_SYSCALL (i.e., Ubuntu systems).
 
-In terms of limitations, \texttt{denet} is built with Linux in mind, even if macOS might be supported via host APIs; and does not profile GPU usage. {\color{red}As compared to bpftrace, XX}
+In terms of limitations, \texttt{denet} is built with Linux in mind, even if macOS might be supported via host APIs; and does not profile GPU usage.
 
 \section*{Competing interests}
 
@@ -263,7 +263,7 @@ We thank Mark D. Robinson, Charlotte Soneson and Daniel Incicau for comments on 
 
 \section*{Authors' contributions}
 
-BC and IM conceived the project. BC coded the tool. IM drafted the first version of the manuscript.
+BC and IM conceived the project. BC coded the tool. IM wrote the manuscript.
 
 \bibliographystyle{unsrt}
 \bibliography{refs}
