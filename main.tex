@@ -2,10 +2,9 @@
 \usepackage[a4paper,bottom=0.8in, left=0.8in, right=0.8in, top=0.8in]{geometry}
 \usepackage{graphicx}
 \usepackage{environ}
-\usepackage[usenames]{xcolor}
+\usepackage{xcolor}
 \usepackage{url}
 \usepackage[colorlinks=true,linkcolor=cyan,citecolor=blue]{hyperref}
-%\usepackage{subfigure}
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage[utf8]{inputenc}
@@ -23,7 +22,6 @@
 \usepackage{orcidlink}
 \usepackage[misc]{ifsym}
 \usepackage{enumitem}
-%\usepackage[caption = false]{subfig}
 
 \usepackage{listings}
 \lstset{basicstyle=\small\ttfamily,
@@ -63,9 +61,6 @@
         \renewcommand{\thesection}{S\arabic{section}}%
       }
 
-%\usepackage[sort&compress,numbers,square]{natbib}
-%\bibliographystyle{mplainnat}
-
 \title{\texttt{denet}, a lightweight command-line tool for process monitoring in benchmarking and beyond}
 
 \author{Ben Carrillo \orcidlink{0009-0003-5704-4151}, Izaskun Mallona \orcidlink{0000-0002-2853-7526}\\
@@ -88,9 +83,6 @@ University of Zurich and SIB Swiss Institute of Bioinformatics, Zurich, Switzerl
 \vspace{0.5cm}
 
 \noindent\textbf{Keywords:} resource profiling, workflow, benchmarking, bioinformatics
-
-%\clearpage
-
 
 \section*{Introduction}  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:intro}
@@ -133,10 +125,7 @@ By using eBPF via BCC \cite{bcc}, \texttt{denet} can quantify off-CPU time, e.g.
 
 \texttt{denet}'s Rust architecture is modular. The Rust library includes: core, for low-level system interaction and sampling reading from /proc on Linux; config, which manages user inputs (e.g., sampling intervals, monitoring and output options); error, to handle exceptions; cpu-sampler, to measure CPU time akin to top and htop; and python, containing the PyO3 bindings that expose the Rust API to Python.
 
-
 \subsection*{Comparison to other tools}
-
-%{\color{red} cite or add \url{https://github.com/WanluLiuLab/labw_proc_profiler} to the table?}
 
 Table~\ref{tab:tool_comparison} describes \texttt{denet}'s capabilities as compared to other profilers and Unix tools.
 
@@ -236,13 +225,6 @@ summary_json = monitor.get_summary()
 \caption{API usage example. \label{fig:api}}
 \end{figure}
 
-
-
-%\subsection{Using denet to profile bwa-mem alignment performance}
-
-%{\color{red} do some bwa-mem here}
-
-
 \section*{Conclusion}
 
 \texttt{denet} is a lightweight and customizable process monitoring tool purposefully built for the needs of modern bioinformatics workflows and benchmarks. Compared to other tools, \texttt{denet} provides adaptive sampling, recursive process tree monitoring, and eBPF support.  Its dual interface, including a CLI for interactive usage or POSIX workflows, and a Python API for flexible programming, provides extra flexibility. \texttt{denet} is free software. The eBPF support requires Linux 4.x or above kernels compiled with CONFIG\_BPF\_SYSCALL (i.e., Ubuntu systems).
@@ -266,7 +248,60 @@ We thank Mark D. Robinson, Charlotte Soneson and Daniel Incicau for comments on 
 BC and IM conceived the project. BC coded the tool. IM wrote the manuscript.
 
 \bibliographystyle{unsrt}
-\bibliography{refs}
+%\bibliography{refs}
+
+\begin{thebibliography}{1}
+
+\bibitem{gregg2019bpf}
+Brendan Gregg.
+\newblock {\em BPF performance tools}.
+\newblock Addison-Wesley Professional, 2019.
+
+\bibitem{gbadamosi2024ebpf}
+Bolaji Gbadamosi, Luigi Leonardi, Tobias Pulls, Toke H{\o}iland-J{\o}rgensen,
+  Simone Ferlin-Reiter, Simo Sorce, and Anna Brunstr{\"o}m.
+\newblock The ebpf runtime in the linux kernel.
+\newblock {\em arXiv preprint arXiv:2410.00026}, 2024.
+
+\bibitem{benson2024netedit}
+Theophilus~A Benson, Prashanth Kannan, Prankur Gupta, Balasubramanian Madhavan,
+  Kumar~Saurabh Arora, Jie Meng, Martin Lau, Abhishek Dhamija, Rajiv
+  Krishnamurthy, Srikanth Sundaresan, et~al.
+\newblock Netedit: An orchestration platform for ebpf network functions at
+  scale.
+\newblock In {\em Proceedings of the ACM SIGCOMM 2024 Conference}, pages
+  721--734, 2024.
+
+\bibitem{bcc}
+IOVisor Project.
+\newblock Bcc - tools for bpf-based linux io analysis, networking, monitoring,
+  and more.
+\newblock \url{https://github.com/iovisor/bcc}, 2025.
+\newblock Accessed: 2025-09-11.
+
+\bibitem{bpftrace}
+bpftrace contributors.
+\newblock bpftrace: High-level tracing language for linux ebpf.
+\newblock \url{https://github.com/bpftrace/bpftrace}, 2025.
+\newblock Accessed: 2025-09-11.
+
+\bibitem{rodola2020psutil}
+Giampaolo Rodola.
+\newblock \texttt{psutil} documentation.
+\newblock {\em Psutil. \url{https://psutil.readthedocs.io/en/latest}}, 2025.
+
+\bibitem{psrecord}
+Thomas Robitaille.
+\newblock \texttt{psrecord}: Record the cpu and memory activity of a process.
+\newblock \url{https://github.com/astrofrog/psrecord}, 2025.
+\newblock Version 1.4.
+
+\bibitem{raymond1999cathedral}
+Eric Raymond.
+\newblock The cathedral and the bazaar.
+\newblock {\em Knowledge, Technology \& Policy}, 12(3):23--49, 1999.
+
+\end{thebibliography}
 
 \clearpage
 
@@ -274,6 +309,5 @@ BC and IM conceived the project. BC coded the tool. IM wrote the manuscript.
 %\section{Supplementary material}  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %\subsection{Supplementary figures}  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 \end{document}
