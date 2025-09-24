@@ -27,13 +27,13 @@
   commentstyle=\color{teal},
   keywordstyle=\color{teal}}
 
-\title{\texttt{denet}, a lightweight command-line tool for process monitoring in benchmarking and beyond}
+\title{\texttt{denet}, a lightweight command-line tool for process monitoring in bioinformatics benchmarking and beyond}
 
 \author{Ben Carrillo \orcidlink{0009-0003-5704-4151}, Izaskun Mallona \orcidlink{0000-0002-2853-7526}\\
 \\
 Department of Molecular Life Sciences, University of Zurich,\\
 and SIB Swiss Institute of Bioinformatics, Zurich, Switzerland \\ 
-{ \Letter: \texttt{benjamincarrillochica@uzh.ch} and \texttt{izaskun.mallona@mls.uzh.ch}}
+{ \Letter: \texttt{ben.uzh@proton.me} and \texttt{izaskun.mallona@mls.uzh.ch}}
 }
 
 \date{}
@@ -43,9 +43,9 @@ and SIB Swiss Institute of Bioinformatics, Zurich, Switzerland \\
 	
 \section*{Abstract} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\paragraph{Summary:} \texttt{denet} is a lightweight process monitoring utility providing real-time resource profiling of running processes. \texttt{denet} reports CPU, memory, disk I/O, network activity, and thread usage, including recursive child monitoring, with adaptive sampling rates. It offers both a command-line interface (CLI) with colorized outputs and a Python API for inclusion in other software. Its output formats are structured as either JSON, JSONL, or CSV, and include performance metrics as well as process metadata, including PID and the executed command. The easy to parse profiling results make \texttt{denet} suitable for benchmarking, debugging, monitoring, and optimizing data-intensive pipelines in bioinformatics and other fields. 
+\paragraph{Summary:} \texttt{denet} is a lightweight process monitoring utility providing real-time resource profiling of running processes. \texttt{denet} reports CPU, memory, disk I/O, network activity, and thread usage, including recursive child monitoring, with adaptive sampling rates. It offers both a command-line interface (CLI) with colorized outputs and a Python API for inclusion in other software. Output includes performance metrics as well as process metadata, including PID and the executed command. Output formats are JSON, JSONL, and CSV.  Easy-to-parse, intuitive structured results are a design choice that makes \texttt{denet} suitable for benchmarking, debugging, monitoring, and optimizing data-intensive pipelines in bioinformatics and other fields. 
 
-\paragraph{Availability and implementation:} \texttt{denet} is open-source software released under the GPLv3 license and maintained at \url{https://github.com/btraven00/denet}. It is implemented in Rust, with Python bindings provided via \texttt{maturin}, and can be installed from Cargo (\texttt{cargo install denet}) or PyPI (\texttt{pip install denet}). Most functionality does not require administrative privileges, enabling use on cloud platforms, HPC clusters, and standard Linux workstations. Certain advanced features, such as eBPF support, may require elevated permissions. Documentation, including usage examples and API references, is provided.
+\paragraph{Availability and implementation:} \texttt{denet} is open-source software released under the GPLv3 license, and maintained at \url{https://github.com/btraven00/denet}. It is implemented in Rust, with Python bindings provided via \texttt{maturin}, and can be installed either from Cargo (\texttt{cargo install denet}) or PyPI (\texttt{pip install denet}). Most functionality does not require administrative privileges, enabling use on cloud platforms, HPC clusters, and standard Linux workstations. Certain advanced features, such as eBPF support, may require elevated permissions. Documentation, including usage examples and API references, is provided.
 
 \vspace{0.5cm}
 
@@ -56,26 +56,27 @@ and SIB Swiss Institute of Bioinformatics, Zurich, Switzerland \\
 
 Granular resource profiling data (CPU and memory usage, disk and network I/O) drives bioinformatics tool performance optimization at multiple levels: guiding code improvements during tool development, informing the tuning of execution parameters, and shaping the design of the overall workflow.
 
-Standard command-line tools are poorly suited for this task in automated settings: \emph{system-level profilers} (top, htop) lack process-specificity, making it difficult to isolate the resource footprint of a single job, while \emph{process-summary utilities} (time) report only cumulative totals upon completion, missing the real-time dynamics that often indicate bottlenecks. Furthermore, the unstructured, text-based output of these tools is designed for interactive use, not automated parsing. This characteristic hinders their integration into workflow management systems and complicates systematic, reproducible performance profiling.
+Standard command-line tools are poorly suited for this task in automated settings: \emph{system-level profilers} (top, htop) lack process-specificity, making it difficult to isolate the resource footprint of a single job, while \emph{process-summary utilities} (time) report only cumulative totals upon completion, missing the real-time dynamics that often indicate bottlenecks. Furthermore, the unstructured, text-based output of these tools is often designed for interactive use, not automated parsing. This characteristic hinders their integration into workflow management systems and complicates systematic, reproducible performance profiling.
 
-Major workflow systems, such as make, snakemake or nextflow, provide either none or coarse-grained and non-customizable resource profiling. In this context, we describe a new monitoring toolkit, \texttt{denet} (Turkish: `inspection' or `check'), that could be either used interactively by coupling its CLI to specific commands, or embedded into scripts and/or workflow managers.
+Major workflow systems, such as make, snakemake or nextflow, provide either none or coarse-grained and non-customizable resource profiling. In this context, we describe a new monitoring toolkit, \texttt{denet} (Turkish: `inspection' or `check'), that could be either used interactively in the command line to run specific commands, or embedded into scripts and/or workflow managers.
 
 \section*{Implementation and capabilities}
 
 \subsection*{Adaptive profiling with user-provided resolution}
 
 \texttt{denet} provides sampling at regular time units (e.g., milliseconds). As an alternative and a main innovation, the tool also offers an \emph{adaptive sampling strategy}, that is, modulating the frequency of metric collection based on the elapsed runtime of the monitored process. With this strategy, during the first second, \texttt{denet} samples at the highest frequency (e.g., every 100 ms), ensuring fine-grained resolution during process startup and transient activity spikes. During the next nine seconds, the sampling rate is decreased gradually to reach the user-provided maximum interval; this rate is maintained for processes running over 10 s, hence providing full control on the profiling resolution.
-This adaptive profiling algorithm enables the characterization of short-lived or dynamic tasks (such as CPU bursts or parallel I/O) at high resolution, while also minimizing systems overhead for long running tasks.
+
+This adaptive profiling algorithm enables the characterization of short-lived or dynamic tasks (such as CPU bursts or parallel I/O) at high resolution, while also minimizing systems overhead for long-running tasks.
 
 \subsection*{Metrics}
 
 The tool collects multiple performance metrics and events:
 
 \begin{enumerate}[itemsep=0.5pt, topsep=1pt]
-    \item CPU usage: Aggregated and per-core, so 100\% indicates a full single core, and 400\% four full single cores, following top/htop conventions in posix systems.
-    \item Memory: Including RSS and VMS separately, hence providing information about peak usage, swapping events, and memory leaks.
+    \item CPU usage: Aggregated and per-core, so 100\% indicates a full single core, and 400\% four full single cores, following top/htop conventions in POSIX systems.
+    \item Memory: Including RSS and VMS separately, hence providing information about peak usage, swapping events, and possible memory leaks.
     \item Disk reads and writes (I/O): Bytes read and written per interval.
-    \item Thread counts: Thread counts and child processes spawned from a parent process are tracked and monitored, hence reporting parallelization and forking (e.g., as in frequent alignment tools, such as STAR or BWA). Tracking down the child processes of a parent can be disabled with \texttt{--no-include-children}. 
+    \item Thread counts: Both the number of threads and any child processes spawned from a parent process are tracked and reported, which provides insight into concurrency (e.g., for alignment tools such as STAR or BWA). Tracking child processes of a parent can be disabled with \texttt{--no-include-children}.
     \item Exit statuses: Monitored parent process exit code termination, indicating uneventful successes as well as error codes as reported by the process.
     \item Logging: As a summary and metadata, \texttt{denet} reports the full command of the monitored process, the path to its executable, PID, runtime duration, and the profiling strategy (e.g., the \texttt{denet} call, including the adaptive sampling specification, if used).
 \end{enumerate}
@@ -90,7 +91,7 @@ By using eBPF via BCC \cite{bcc}, \texttt{denet} can quantify off-CPU time, e.g.
 
 \subsection*{Architecture}
 
-\texttt{denet}'s Rust architecture is modular. The Rust library includes: core, for low-level system interaction and sampling reading from /proc on Linux; config, which manages user inputs (e.g., sampling intervals, monitoring and output options); error, to handle exceptions; cpu-sampler, to measure CPU time akin to top and htop; and python, containing the PyO3 bindings that expose the Rust API to Python.
+\texttt{denet}'s Rust architecture is modular. The Rust library includes: core, for low-level system interaction and sampling reading from \texttt{/proc} on Linux; config, which manages user inputs (e.g., sampling intervals, monitoring and output options); error, to handle exceptions; cpu-sampler, to measure CPU time akin to \texttt{top} and \texttt{htop}; and Python, containing the PyO3 bindings that expose the Rust API to Python.
 
 \subsection*{Comparison to other tools}
 
@@ -103,17 +104,17 @@ Table~\ref{tab:tool_comparison} describes \texttt{denet}'s capabilities as compa
   \small
   \caption{Comparison of process monitoring tools and libraries.}
   \label{tab:tool_comparison}
-  \begin{tabularx}{\linewidth}{c c c c c c} %{@{} L L *{5}{C} @{}}
+  \begin{tabularx}{\linewidth}{c c c c c c c} %{@{} L L *{5}{C} @{}}
    \toprule
-    Tool                    & Output              & Process tree  & API/CLI & Adaptive sampling &  eBPF     \\
+    Tool                    & Output              & Process tree  & API/CLI & Adaptive sampling &  eBPF & GPU     \\
     \midrule
-    \texttt{denet}          & Terminal, JSON, CSV & Yes          & Both    & Yes                   & Yes      \\
-    \texttt{bpftrace}\cite{bpftrace}       & Terminal            & Yes         & CLI      & No                    & Yes \\
-    \texttt{top/htop}       & Terminal            & Partial      & CLI     & No                    & No                \\
-    \texttt{ps}             & Text/CSV            & No           & CLI     & No                    & No                \\
-    \texttt{time}           & Text                & No           & CLI     & No                    & No                \\
-    \texttt{pidstat}        & Text/CSV            & Partial      & CLI     & No           & No                \\
-    \texttt{psutil\cite{rodola2020psutil}/psrecord\cite{psrecord}}& Text/PNG  & Partial      & Both     & No          & No            \\
+    \texttt{denet}          & Terminal, JSON, CSV & Yes          & Both    & Yes                   & Yes     & Yes \\
+    \texttt{bpftrace}\cite{bpftrace}       & Terminal            & Yes         & CLI      & No                    & Yes & No \\
+    \texttt{top/htop}       & Terminal            & Partial      & CLI     & No                    & No                & No \\
+    \texttt{ps}             & Text/CSV            & No           & CLI     & No                    & No                & No\\
+    \texttt{time}           & Text                & No           & CLI     & No                    & No                & No\\
+    \texttt{pidstat}        & Text/CSV            & Partial      & CLI     & No           & No        & No        \\
+    \texttt{psutil\cite{rodola2020psutil}/psrecord\cite{psrecord}}& Text/PNG  & Partial      & Both     & No          & No     & No       \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -196,9 +197,9 @@ summary_json = monitor.get_summary()
 
 \section*{Conclusion}
 
-\texttt{denet} is a lightweight and customizable process monitoring tool purposefully built for the needs of modern bioinformatics workflows and benchmarks. Compared to other tools, \texttt{denet} provides adaptive sampling, recursive process tree monitoring, and eBPF support.  Its dual interface, including a CLI for interactive usage or POSIX workflows, and a Python API for flexible programming, provides extra flexibility. \texttt{denet} is free software. The eBPF support requires Linux 4.x or above kernels compiled with CONFIG\_BPF\_SYSCALL (i.e., Ubuntu systems).
+\texttt{denet} is a lightweight and customizable process monitoring tool purposefully built for the needs of modern bioinformatics workflows and benchmarks. Compared to other tools, \texttt{denet} provides adaptive sampling, recursive process tree monitoring, and eBPF support.  Its dual interface, including a CLI for interactive usage or POSIX workflows, and a Python API for flexible scripting, provides extra flexibility. \texttt{denet} is free software. The eBPF support requires Linux 4.x or above kernels compiled with CONFIG\_BPF\_SYSCALL (e.g., recent Ubuntu systems).
 
-In terms of limitations, \texttt{denet} is built with Linux in mind, even if macOS might be supported via host APIs; and does not profile GPU usage.
+In terms of limitations, \texttt{denet} is built with Linux in mind, even if macOS might be supported via host APIs.
 
 \section*{Competing interests}
 
