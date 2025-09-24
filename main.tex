@@ -96,7 +96,7 @@ By using eBPF via BCC \cite{bcc}, \texttt{denet} can quantify off-CPU time, e.g.
 
 \subsection*{Comparison to other tools}
 
-As compared to other profiling tools, frameworks and libraries such as \texttt{top/htop}, \texttt{ps}, \texttt{time}, \texttt{pidstat} and \texttt{psutil/psrecord} \cite{psrecord},  \texttt{denet} offers adaptive sampling capabilities. Both \texttt{denet} and \texttt{psutil} \cite{rodola2020psutil} can be used programmatically via an API, whereas others are CLI-oriented. \texttt{denet} and \texttt{bpftrace} \cite{bpftrace} support recursive parsing of the process tree, while \texttt{top/htop}, \texttt{pidstat} and \texttt{psutil/psrecord} partially support it. In terms of structured output and parsing friendliness, \texttt{ps}, \texttt{time}, \texttt{pidstat}, \texttt{psutil} and \texttt{denet} allow to stream structured text, while \texttt{bpftrace} and \texttt{top/htop} are meant to be used on interactive terminal sessions. As for capabilities, both \texttt{bpftrace} and \texttt{denet} support eBPF. Of anote, \texttt{bpftime} is a runtime offering eBPF capabilities, but it does not ship an off-the-shelf and user-friendly CLI-based generic profiler. As for GPU observability within a general purpose profiler, to our knowledge only \texttt{denet} and the \texttt{bpftime} \cite{zheng2025extendingbpftime} runtime provide it.
+As compared to other profiling tools, frameworks and libraries such as \texttt{top/htop}, \texttt{ps}, \texttt{time}, \texttt{pidstat} and \texttt{psutil/psrecord} \cite{psrecord},  \texttt{denet} offers adaptive sampling capabilities. Both \texttt{denet} and \texttt{psutil} \cite{rodola2020psutil} can be used programmatically via an API, whereas others are CLI-oriented. \texttt{denet} and \texttt{bpftrace} \cite{bpftrace} support recursive parsing of the process tree, while \texttt{top/htop}, \texttt{pidstat} and \texttt{psutil/psrecord} partially support it. In terms of structured output and parsing friendliness, \texttt{ps}, \texttt{time}, \texttt{pidstat}, \texttt{psutil} and \texttt{denet} allow to stream structured text, while \texttt{bpftrace} and \texttt{top/htop} are meant to be used on interactive terminal sessions. As for capabilities, both \texttt{bpftrace} and \texttt{denet} support eBPF. Of a note, \texttt{bpftime} \cite{zheng2025} is a runtime offering eBPF capabilities, but it does not ship an off-the-shelf and user-friendly CLI-based generic profiler. As for GPU observability within a general purpose profiler, to our knowledge only \texttt{denet} and the \texttt{bpftime}  runtime provide it.
 
 \section*{Usage}
 
@@ -204,6 +204,7 @@ Brendan Gregg.
 \newblock {\em BPF performance tools}.
 \newblock Addison-Wesley Professional, 2019.
 
+
 \bibitem{gbadamosi2024ebpf}
 Bolaji Gbadamosi, Luigi Leonardi, Tobias Pulls, Toke H{\o}iland-J{\o}rgensen,
   Simone Ferlin-Reiter, Simo Sorce, and Anna Brunstr{\"o}m.
@@ -242,6 +243,13 @@ Thomas Robitaille.
 \newblock \texttt{psrecord}: Record the cpu and memory activity of a process.
 \newblock \url{https://github.com/astrofrog/psrecord}, 2025.
 \newblock Version 1.4.
+
+
+\bibitem{zheng2025}
+Y.~Zheng, T.~Yu, Y.~Yang, Y.~Hu, X.~Lai, D.~Williams, and A.~Quinn.
+\newblock Extending applications safely and efficiently.
+\newblock In \emph{19th USENIX Symposium on Operating Systems Design and
+  Implementation (OSDI 25)}, pages 557--574, 2025.
 
 \bibitem{raymond1999cathedral}
 Eric Raymond.
