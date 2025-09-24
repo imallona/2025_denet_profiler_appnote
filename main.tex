@@ -75,6 +75,7 @@ The tool collects multiple performance metrics and events:
 \begin{enumerate}[itemsep=0.5pt, topsep=1pt]
     \item CPU usage: Aggregated and per-core, so 100\% indicates a full single core, and 400\% four full single cores, following top/htop conventions in POSIX systems.
     \item Memory: Including RSS and VMS separately, hence providing information about peak usage, swapping events, and possible memory leaks.
+    \item GPU: Including GPU memory usage and percent usage. (This capability requires installing NVIDIA Management Library NVML.)
     \item Disk reads and writes (I/O): Bytes read and written per interval.
     \item Thread counts: Both the number of threads and any child processes spawned from a parent process are tracked and reported, which provides insight into concurrency (e.g., for alignment tools such as STAR or BWA). Tracking child processes of a parent can be disabled with \texttt{--no-include-children}.
     \item Exit statuses: Monitored parent process exit code termination, indicating uneventful successes as well as error codes as reported by the process.
@@ -95,31 +96,7 @@ By using eBPF via BCC \cite{bcc}, \texttt{denet} can quantify off-CPU time, e.g.
 
 \subsection*{Comparison to other tools}
 
-\vspace{-0.1cm}
-
-Table~\ref{tab:tool_comparison} describes \texttt{denet}'s capabilities as compared to other profilers and Unix tools.
-
-\begin{table}[ht]
-  \centering
-  \small
-  \caption{Comparison of process monitoring tools and libraries.}
-  \label{tab:tool_comparison}
-  \begin{tabularx}{\linewidth}{c c c c c c c} %{@{} L L *{5}{C} @{}}
-   \toprule
-    Tool                    & Output              & Process tree  & API/CLI & Adaptive sampling &  eBPF & GPU     \\
-    \midrule
-    \texttt{denet}          & Terminal, JSON, CSV & Yes          & Both    & Yes                   & Yes     & Yes \\
-    \texttt{bpftrace}\cite{bpftrace}       & Terminal            & Yes         & CLI      & No                    & Yes & No \\
-    \texttt{top/htop}       & Terminal            & Partial      & CLI     & No                    & No                & No \\
-    \texttt{ps}             & Text/CSV            & No           & CLI     & No                    & No                & No\\
-    \texttt{time}           & Text                & No           & CLI     & No                    & No                & No\\
-    \texttt{pidstat}        & Text/CSV            & Partial      & CLI     & No           & No        & No        \\
-    \texttt{psutil\cite{rodola2020psutil}/psrecord\cite{psrecord}}& Text/PNG  & Partial      & Both     & No          & No     & No       \\
-    \bottomrule
-  \end{tabularx}
-\end{table}
-
-\vspace{-0.8cm}
+As compared to other profiling tools, frameworks and libraries such as \texttt{top/htop}, \texttt{ps}, \texttt{time}, \texttt{pidstat} and \texttt{psutil/psrecord} \cite{psrecord},  \texttt{denet} offers adaptive sampling capabilities. Both \texttt{denet} and \texttt{psutil} \cite{rodola2020psutil} can be used programmatically via an API, whereas others are CLI-oriented. \texttt{denet} and \texttt{bpftrace} \cite{bpftrace} support recursive parsing of the process tree, while \texttt{top/htop}, \texttt{pidstat} and \texttt{psutil/psrecord} partially support it. In terms of structured output and parsing friendliness, \texttt{ps}, \texttt{time}, \texttt{pidstat}, \texttt{psutil} and \texttt{denet} allow to stream structured text, while \texttt{bpftrace} and \texttt{top/htop} are meant to be used on interactive terminal sessions. As for capabilities, both \texttt{bpftrace} and \texttt{denet} support eBPF. Of anote, \texttt{bpftime} is a runtime offering eBPF capabilities, but it does not ship an off-the-shelf and user-friendly CLI-based generic profiler. As for GPU observability within a general purpose profiler, to our knowledge only \texttt{denet} and the \texttt{bpftime} \cite{zheng2025extendingbpftime} runtime provide it.
 
 \section*{Usage}
 
@@ -161,7 +138,7 @@ denet --no-include-children run python multi_process_script.py
 
 \subsection*{Application Programming Interface (API)}
 
-\texttt{denet}’s fully documented API provides the CLI capabilities using a simple syntax, facilitating metrics postprocessing (e.g., generating aggregated statistics, such as min/max/avg) and import from any python codebase, including Jupyter notebooks. Figure~\ref{fig:api} depicts how to monitor a process and collect the JSON summary using the API.
+\texttt{denet}’s fully documented API provides the CLI capabilities using a simple syntax, facilitating metrics postprocessing (e.g., generating aggregated statistics, such as min/max/avg) and import from any Python codebase, including Jupyter notebooks. Figure~\ref{fig:api} depicts how to monitor a process and collect the JSON summary using the API.
 
 
 \begin{figure}[H]
@@ -218,7 +195,11 @@ We thank Mark D. Robinson, Charlotte Soneson and Daniel Incicau for comments on 
 BC and IM conceived the project. BC coded the tool. IM wrote the manuscript.
 
 \bibliographystyle{unsrt}
-%\bibliography{refs}
+\bibliography{aux/refs}
+
+
+\end{document}
+
 
 \begin{thebibliography}{1}
 
